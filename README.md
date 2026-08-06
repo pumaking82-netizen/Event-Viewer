@@ -35,7 +35,7 @@ Documents\PC_Crash_Monitor
 ## Building through GitHub Actions
 
 1. Create a new GitHub repository.
-2. Upload all files and folders from this package, preserving `.github/workflows/build.yml`.
+2. Upload the **contents** of this package to the repository root. After upload, `pc_crash_monitor.py`, `requirements.txt`, and `.github` must appear at the top level—not inside another folder.
 3. Commit to `main` or `master`.
 4. Open the repository's **Actions** tab.
 5. Select **Build Windows EXE**.
