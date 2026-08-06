@@ -1,0 +1,4 @@
+psutil>=5.9.8,<7
+WMI>=1.5.1
+pywin32>=306
+pyinstaller>=6.10,<7
