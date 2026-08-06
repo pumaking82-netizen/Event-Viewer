@@ -3,18 +3,15 @@ name: Build Windows EXE
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master ]
-    paths:
-      - "**.py"
-      - "**.spec"
-      - "requirements.txt"
-      - ".github/workflows/build.yml"
+    branches:
+      - "**"
 
 permissions:
   contents: read
 
 jobs:
   build-windows:
+    name: Build PC Crash Monitor
     runs-on: windows-latest
 
     steps:
@@ -31,30 +28,35 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m pip install -r requirements.txt
 
-      - name: Build EXE
+      - name: Build Windows EXE
         shell: pwsh
         run: |
-          pyinstaller --clean --noconfirm PC_Crash_Monitor.spec
+          python -m PyInstaller --clean --noconfirm PC_Crash_Monitor.spec
 
-      - name: Copy documentation
+      - name: Verify output
         shell: pwsh
         run: |
-          Copy-Item README.md dist\README.md
+          if (!(Test-Path "dist\PC_Crash_Monitor.exe")) {
+            throw "Build completed without creating dist\PC_Crash_Monitor.exe"
+          }
 
-      - name: Package release ZIP
+      - name: Package download ZIP
         shell: pwsh
         run: |
-          Compress-Archive -Path dist\PC_Crash_Monitor.exe, dist\README.md -DestinationPath PC_Crash_Monitor_Windows.zip -Force
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item "dist\PC_Crash_Monitor.exe" "release\PC_Crash_Monitor.exe"
+          Copy-Item "README.md" "release\README.md"
+          Compress-Archive -Path "release\*" -DestinationPath "PC_Crash_Monitor_Windows.zip" -Force
 
-      - name: Upload EXE artifact
+      - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
           name: PC-Crash-Monitor-Windows
           path: |
-            dist/PC_Crash_Monitor.exe
+            release/PC_Crash_Monitor.exe
+            release/README.md
             PC_Crash_Monitor_Windows.zip
-            dist/README.md
           if-no-files-found: error
           retention-days: 30
