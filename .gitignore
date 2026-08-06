@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.spec.bak
+.venv/
+venv/
+PC_Crash_Monitor_Windows.zip
