@@ -1,0 +1,60 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+    paths:
+      - "**.py"
+      - "**.spec"
+      - "requirements.txt"
+      - ".github/workflows/build.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build EXE
+        shell: pwsh
+        run: |
+          pyinstaller --clean --noconfirm PC_Crash_Monitor.spec
+
+      - name: Copy documentation
+        shell: pwsh
+        run: |
+          Copy-Item README.md dist\README.md
+
+      - name: Package release ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path dist\PC_Crash_Monitor.exe, dist\README.md -DestinationPath PC_Crash_Monitor_Windows.zip -Force
+
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PC-Crash-Monitor-Windows
+          path: |
+            dist/PC_Crash_Monitor.exe
+            PC_Crash_Monitor_Windows.zip
+            dist/README.md
+          if-no-files-found: error
+          retention-days: 30
