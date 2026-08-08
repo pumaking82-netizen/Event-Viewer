@@ -1,27 +1,18 @@
-# PC Crash Monitor v1.2
+# PC Crash Monitor v1.3
 
-## What's new
-- Sensor Status panel.
-- Test Sensors button.
-- NVIDIA GPU telemetry via NVML with nvidia-smi fallback.
-- Automatic retry for LibreHardwareMonitor WMI.
-- `sensor_diagnostics.json` now lists every hardware sensor LibreHardwareMonitor exposes.
-- Improved CPU temperature, CPU package power, GPU hotspot/voltage, 12V/5V/3.3V and AIO/fan sensor matching.
-- GitHub artifact no longer contains a nested ZIP/release folder.
+## Major change
+v1.3 no longer depends on LibreHardwareMonitor WMI as the primary interface.
 
-## Best setup for your son's PC
-1. Run LibreHardwareMonitor as Administrator.
-2. Leave LibreHardwareMonitor open.
+It loads the official `LibreHardwareMonitorLib.dll` directly using pythonnet and reads the same hardware sensor library LibreHardwareMonitor itself uses. LibreHardwareMonitor provides a library specifically for application integration. Administrator privileges are requested by the EXE because some sensors require them.
+
+## How to use
+1. Extract the official LibreHardwareMonitor ZIP.
+2. Run LibreHardwareMonitor.exe as Administrator.
 3. Run PC_Crash_Monitor.exe.
-4. Click **Test Sensors**.
-5. Confirm NVIDIA GPU says Connected.
-6. If Hardware Sensors says Connected, CPU/motherboard/AIO readings should populate when the board exposes them.
-7. Click Start Logging.
-8. Play until the black-screen freeze happens.
-9. Restart Windows.
-10. Zip the newest folder under:
-   `Documents\PC_Crash_Monitor`
-11. Send that ZIP for analysis.
+4. Click Test Sensors.
+5. If Hardware Sensors says Direct DLL, you're ready.
+6. If it says Not connected, click Locate LibreHardwareMonitor Folder and select the folder containing both LibreHardwareMonitor.exe and LibreHardwareMonitorLib.dll.
+7. Click Start Logging and game until the crash.
+8. After restart, send the newest Documents\PC_Crash_Monitor\session_* folder.
 
-## PSU note
-The app can log motherboard-reported 12V/5V/3.3V rails when available, but software cannot capture every sub-second PSU transient or directly verify a loose PCIe power connector.
+The sensor diagnostics file records every hardware sensor detected and its exact name.
