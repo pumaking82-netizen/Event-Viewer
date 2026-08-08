@@ -1,10 +1,10 @@
 name: Build Windows EXE
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - "**"
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,43 +13,29 @@ jobs:
   build-windows:
     name: Build PC Crash Monitor
     runs-on: windows-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
-
       - name: Install dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-
       - name: Build Windows EXE
         shell: pwsh
-        run: |
-          python -m PyInstaller --clean --noconfirm PC_Crash_Monitor.spec
-
-      - name: Verify output
+        run: python -m PyInstaller --clean --noconfirm PC_Crash_Monitor.spec
+      - name: Package
         shell: pwsh
         run: |
-          if (!(Test-Path "dist\PC_Crash_Monitor.exe")) {
-            throw "Build completed without creating dist\PC_Crash_Monitor.exe"
-          }
-
-      - name: Package download ZIP
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path release | Out-Null
+          New-Item -ItemType Directory -Force release | Out-Null
           Copy-Item "dist\PC_Crash_Monitor.exe" "release\PC_Crash_Monitor.exe"
           Copy-Item "README.md" "release\README.md"
           Compress-Archive -Path "release\*" -DestinationPath "PC_Crash_Monitor_Windows.zip" -Force
-
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
@@ -59,4 +45,3 @@ jobs:
             release/README.md
             PC_Crash_Monitor_Windows.zip
           if-no-files-found: error
-          retention-days: 30
