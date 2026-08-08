@@ -47,7 +47,7 @@ except Exception:
     tk = None
 
 APP_NAME = "PC Crash Monitor"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 DEFAULT_INTERVAL = 1.0
 LOG_ROOT = Path.home() / "Documents" / "PC_Crash_Monitor"
 STATE_FILE = LOG_ROOT / "last_session.json"
@@ -99,7 +99,6 @@ class NvidiaSmi:
         "utilization.gpu",
         "utilization.memory",
         "temperature.gpu",
-        "temperature.memory",
         "power.draw",
         "power.limit",
         "clocks.current.graphics",
@@ -111,7 +110,6 @@ class NvidiaSmi:
         "pstate",
         "pcie.link.gen.current",
         "pcie.link.width.current",
-        "voltage.graphics",
     ]
 
     def __init__(self) -> None:
@@ -171,8 +169,7 @@ class NvidiaSmi:
                     "utilization.gpu",
                     "utilization.memory",
                     "temperature.gpu",
-                    "temperature.memory",
-                    "fan.speed",
+                                "fan.speed",
                     "memory.used",
                     "memory.total",
                     "pcie.link.gen.current",
@@ -185,8 +182,7 @@ class NvidiaSmi:
                     "clocks.current.graphics",
                     "clocks.current.memory",
                     "clocks.current.sm",
-                    "voltage.graphics",
-                }:
+                            }:
                     result[key] = safe_float(raw)
                 else:
                     result[key] = raw
@@ -457,6 +453,7 @@ class CrashMonitor:
 
         gpu = self.nvidia.sample()
         flatten_dict("nvidia", gpu, row)
+        row["gpu.telemetry_status"] = "Connected" if gpu.get("available") and not gpu.get("error") else (gpu.get("error") or "Not connected")
 
         lhm = self.lhm.sample()
         flatten_dict("lhm", lhm, row)
@@ -465,7 +462,6 @@ class CrashMonitor:
         # Prefer NVIDIA telemetry for these standardized columns when available.
         mappings = {
             "gpu.core_temperature_c": "nvidia.temperature_gpu",
-            "gpu.memory_temperature_c": "nvidia.temperature_memory",
             "gpu.core_load_percent": "nvidia.utilization_gpu",
             "gpu.memory_load_percent": "nvidia.utilization_memory",
             "gpu.power_w": "nvidia.power_draw",
@@ -475,7 +471,6 @@ class CrashMonitor:
             "gpu.memory_clock_mhz": "nvidia.clocks_current_memory",
             "gpu.memory_used_mb": "nvidia.memory_used",
             "gpu.memory_total_mb": "nvidia.memory_total",
-            "gpu.graphics_voltage_v": "nvidia.voltage_graphics",
             "gpu.pcie_generation": "nvidia.pcie_link_gen_current",
             "gpu.pcie_width": "nvidia.pcie_link_width_current",
         }
