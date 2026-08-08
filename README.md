@@ -1,18 +1,34 @@
-# PC Crash Monitor v1.3
+# PC Crash Monitor v1.4
 
-## Major change
-v1.3 no longer depends on LibreHardwareMonitor WMI as the primary interface.
+v1.4 uses LibreHardwareMonitor's native CSV logs instead of WMI or DLL integration.
 
-It loads the official `LibreHardwareMonitorLib.dll` directly using pythonnet and reads the same hardware sensor library LibreHardwareMonitor itself uses. LibreHardwareMonitor provides a library specifically for application integration. Administrator privileges are requested by the EXE because some sensors require them.
+## Setup
+1. Run LibreHardwareMonitor as Administrator.
+2. Turn on LibreHardwareMonitor logging.
+3. Confirm `LibreHardwareMonitorLog-*.csv` files are being created.
+4. Start PC Crash Monitor v1.4.
+5. Click **Locate LHM Log Folder** and select the folder containing those CSVs.
+6. Click **Test Sensors**.
+7. The status should show `LibreHardwareMonitor CSV: Connected (...)`.
+8. Click **Start Logging**, minimize it, and game.
 
-## How to use
-1. Extract the official LibreHardwareMonitor ZIP.
-2. Run LibreHardwareMonitor.exe as Administrator.
-3. Run PC_Crash_Monitor.exe.
-4. Click Test Sensors.
-5. If Hardware Sensors says Direct DLL, you're ready.
-6. If it says Not connected, click Locate LibreHardwareMonitor Folder and select the folder containing both LibreHardwareMonitor.exe and LibreHardwareMonitorLib.dll.
-7. Click Start Logging and game until the crash.
-8. After restart, send the newest Documents\PC_Crash_Monitor\session_* folder.
+v1.4 follows the newest LHM log automatically, so it continues working if LibreHardwareMonitor creates a new CSV file.
 
-The sensor diagnostics file records every hardware sensor detected and its exact name.
+## What is merged
+- CPU usage/frequency/RAM from Windows
+- NVIDIA usage/temp/power/fan/clocks/VRAM/PCIe from NVML
+- CPU package temperature/power/voltage from LHM when exposed
+- GPU hotspot/voltage/fan RPM/LHM power
+- Motherboard 12V/5V/3.3V sensors when exposed
+- Pump/fan sensors when LHM names them
+- Additional raw LHM sensor columns in the crash log
+- Windows critical/error/WHEA/display events
+
+## After a hard freeze
+Restart Windows and send the newest folder under:
+`Documents\PC_Crash_Monitor\session_*`
+
+The logger flushes its merged telemetry row to disk every sample.
+
+## PSU limitation
+Motherboard voltage readings can help identify a large rail problem, but software cannot guarantee detection of a very short PSU transient between samples and cannot directly verify a loose PCIe power connector.
